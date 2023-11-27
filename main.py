@@ -1,16 +1,50 @@
-git # This is a sample Python script.
+from Comparator import Comparator
+from Plane import Plane
+from Scan import Scan
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+scan = Scan.load_scan_from_file(scan_name="0", filepath="src/concrete/Бетон85-exported.txt")
 
+data_dict = {0: {"name": "dry_concrete_0",
+                 "filepath": "src/concrete/Бетон0-exported.txt",
+                 },
+             20: {"name": "dry_concrete_20",
+                  "filepath": "src/concrete/Бетон20-exported.txt",
+                  },
+             30: {"name": "dry_concrete_30",
+                  "filepath": "src/concrete/Бетон30-exported.txt",
+                  },
+             40: {"name": "dry_concrete_40",
+                  "filepath": "src/concrete/Бетон40-exported.txt",
+                  },
+             50: {"name": "dry_concrete_50",
+                  "filepath": "src/concrete/Бетон50-exported.txt",
+                  },
+             55: {"name": "dry_concrete_55",
+                  "filepath": "src/concrete/Бетон55-exported.txt",
+                  },
+             60: {"name": "dry_concrete_60",
+                  "filepath": "src/concrete/Бетон60-exported.txt",
+                  },
+             65: {"name": "dry_concrete_65",
+                  "filepath": "src/concrete/Бетон65-exported.txt",
+                  },
+             70: {"name": "dry_concrete_70",
+                  "filepath": "src/concrete/Бетон70-exported.txt",
+                  },
+             75: {"name": "dry_concrete_75",
+                  "filepath": "src/concrete/Бетон75-exported.txt",
+                  },
+             80: {"name": "dry_concrete_80",
+                  "filepath": "src/concrete/Бетон80-exported.txt",
+                  },
+             85: {"name": "dry_concrete_85",
+                  "filepath": "src/concrete/Бетон85-exported.txt",
+                  },
+             }
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+comparator = Comparator("dry_concrete", data_dict)
 
+# comparator.plot_mse()
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+comparator.plot_points_distributions()
+print(scan)
