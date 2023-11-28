@@ -15,6 +15,9 @@ class Scan:
         self.plane = None
         self.mse_y = None
         self.mse_d = None
+        self.type_ = None
+        self.material = None
+        self.angle = None
 
     def __iter__(self):
         return iter(self.points)
@@ -29,12 +32,15 @@ class Scan:
         return f"Scan(name={self.name}, mse_y={self.mse_y:.6f}, mse_d={self.mse_d:.6f})"
 
     @classmethod
-    def load_scan_from_file(cls, scan_name, filepath):
+    def load_scan_from_file(cls, scan_name, filepath, type_=None, material=None, angle=None):
         scan = cls(scan_name)
+        scan.type_ = type_
+        scan.material = material
+        scan.angle = angle
         with open(filepath, "rt") as file_read:
             file_read.readline()
             for line in file_read:
-                point = Point(*[float(el) for el in line.strip().split()])
+                point = Point(*[float(el) for el in line.strip().split()[:3]])
                 scan.points.append(point)
                 cls._update_scan_borders(scan, point)
         scan.len = len(scan.points)
