@@ -21,24 +21,38 @@ class Comparator:
         for angle, data in self.data_dict.items():
             self.scans[angle] = Scan.load_scan_from_file(scan_name=data["name"], filepath=data["filepath"])
         data = {"angle": [],
-                "mse_y": [],
-                "mse_d": [],
+                "mse": [],
+                "type": [],
                 }
         for angle, scan in self.scans.items():
+            data["mse"].append(scan.mse_y)
             data["angle"].append(angle)
-            data["mse_y"].append(scan.mse_y)
-            data["mse_d"].append(scan.mse_d)
+            data["type"].append("mse_y")
+            data["mse"].append(scan.mse_d)
+            data["angle"].append(angle)
+            data["type"].append("mse_d")
         self.df = pd.DataFrame(data)
 
     def plot_mse(self):
         sns.set_style("darkgrid")
-        ax = plt.subplot()
-        ax.scatter(data=self.df, x="angle", y="mse_y", color="b", label="mse_y")
-        ax.scatter(data=self.df, x="angle", y="mse_d", color="r", label="mse_d")
-        ax.set_title(self.surface_type)
-        ax.set(xlabel="angle_deg", ylabel="MSE")
-        plt.legend(loc="upper left")
+        # g = sns.lmplot()
+        ax = sns.lmplot(data=self.df, x="angle", y="mse", hue="type", fit_reg=False)
+        # ax.scatter(data=self.df, x="angle", y="mse_y", color="b", label="mse_y")
+        # ax.scatter(data=self.df, x="angle", y="mse_d", color="r", label="mse_d")
+        # ax.set_title(self.surface_type)
+        # ax.set(xlabel="angle_deg", ylabel="MSE")
+        # plt.legend(loc="upper left")
         plt.show()
+
+    # def plot_mse(self):
+    #     sns.set_style("darkgrid")
+    #     ax = plt.subplot()
+    #     ax.scatter(data=self.df, x="angle", y="mse_y", color="b", label="mse_y")
+    #     ax.scatter(data=self.df, x="angle", y="mse_d", color="r", label="mse_d")
+    #     ax.set_title(self.surface_type)
+    #     ax.set(xlabel="angle_deg", ylabel="MSE")
+    #     plt.legend(loc="upper left")
+    #     plt.show()
 
     def plot_points_distributions(self):
         sns.set_style("darkgrid")
