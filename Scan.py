@@ -1,3 +1,6 @@
+import random
+from copy import deepcopy
+
 import matplotlib.pyplot as plt
 
 from Plane import Plane
@@ -12,7 +15,7 @@ class Scan:
         self.len = 0
         self.min_x, self.min_y, self.min_z = None, None, None
         self.max_x, self.max_y, self.max_z = None, None, None
-        self.plane = None
+        self.base_plane = None
         self.mse_y = None
         self.mse_d = None
         self.type_ = None
@@ -31,6 +34,15 @@ class Scan:
     def __str__(self):
         return f"Scan(name={self.name}, mse_y={self.mse_y:.6f}, mse_d={self.mse_d:.6f})"
 
+    def get_sub_scan(self, point_count, random_seed=None):
+        if point_count < 0 or point_count > len(self):
+            raise ValueError("Неправильное количество точек в субскане")
+        if random_seed is not None:
+            random.seed(random_seed)
+        sub_scan = deepcopy(self)
+        sub_scan.points = random.sample(sub_scan.points, point_count)
+        return sub_scan
+
     @classmethod
     def load_scan_from_file(cls, scan_name, filepath, type_=None, material=None, angle=None):
         scan = cls(scan_name)
@@ -44,7 +56,7 @@ class Scan:
                 scan.points.append(point)
                 cls._update_scan_borders(scan, point)
         scan.len = len(scan.points)
-        scan.plane = Plane.calk_plane_from_scan(scan)
+        scan.base_plane = Plane.calk_plane_from_scan(scan)
         scan._calk_scan_mse_y()
         scan._calk_scan_mse_d()
         return scan
@@ -52,7 +64,7 @@ class Scan:
     def _calk_scan_mse_y(self):
         vv = 0
         for point in self:
-            plane_y = self.plane.get_y_from_x_z(point.x, point.z)
+            plane_y = self.base_plane.get_y_from_x_z(point.x, point.z)
             v_y = plane_y - point.y
             point.v_y = v_y
             vv += v_y ** 2
@@ -62,13 +74,13 @@ class Scan:
     def _calk_scan_mse_d(self):
         vv = 0
         for point in self:
-            v_d = self.plane.get_distance_from_point(point)
+            v_d = self.base_plane.get_distance_from_point(point)
             point.v_d = v_d
             vv += v_d ** 2
             self.mse_d = (vv / (len(self) - 1)) ** 0.5
         return self.mse_d
 
-    def plot(self, point_size=5):
+    def plot(self, point_size=50):
         ScanPlotterMPL(point_size=point_size).plot(scan=self)
 
     @staticmethod

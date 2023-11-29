@@ -16,7 +16,7 @@ class Comparator:
         self._init_comparator()
 
     def __iter__(self):
-        return iter(self.scans.items())
+        return iter(self.scans)
 
     def _init_comparator(self):
         for data in self.data_dict:
@@ -56,36 +56,74 @@ class Comparator:
                         col="type_",
                         fit_reg=False,
                         )
-        # ax.scatter(data=self.df, x="angle", y="mse_y", color="b", label="mse_y")
-        # ax.scatter(data=self.df, x="angle", y="mse_d", color="r", label="mse_d")
-        # ax.set_title(self.surface_type)
-        # ax.set(xlabel="angle_deg", ylabel="MSE")
-        # plt.legend(loc="upper left")
         plt.show()
 
-    # def plot_mse(self):
-    #     sns.set_style("darkgrid")
-    #     ax = plt.subplot()
-    #     ax.scatter(data=self.df, x="angle", y="mse_y", color="b", label="mse_y")
-    #     ax.scatter(data=self.df, x="angle", y="mse_d", color="r", label="mse_d")
-    #     ax.set_title(self.surface_type)
-    #     ax.set(xlabel="angle_deg", ylabel="MSE")
-    #     plt.legend(loc="upper left")
-    #     plt.show()
+    def plot_with_variance(self):
+        data = {"angle": [],
+                "v_points": [],
+                "mse_type": [],
+                "material": [],
+                "type_": [],
+                }
+        for scan in self.scans:
+            for point in scan:
+                v_y = point.v_y + scan.mse_y
+                v_d = point.v_d + scan.mse_d
+                data["material"].append(scan.material)
+                data["type_"].append(scan.type_)
+                data["angle"].append(scan.angle)
+                data["v_points"].append(v_y)
+                data["mse_type"].append("mse_y")
+                data["material"].append(scan.material)
+                data["type_"].append(scan.type_)
+                data["angle"].append(scan.angle)
+                data["v_points"].append(v_d)
+                data["mse_type"].append("mse_d")
+
+        df = pd.DataFrame(data)
+        sns.set_style("darkgrid")
+        ax = sns.relplot(data=df,
+                         x="angle",
+                         y="v_points",
+                         style="mse_type",
+                         hue="mse_type",
+                         col="type_",
+                         kind="line",
+                         markers=True,
+                         )
+        plt.show()
 
     def plot_points_distributions(self):
         sns.set_style("darkgrid")
-        for angle, scan in self:
-            data = {"deviation": [],
-                    "type": []}
-            for point in scan:
-                data["deviation"].append(point.v_y)
-                data["type"].append("v_y")
-                data["deviation"].append(point.v_d)
-                data["type"].append("v_d")
+        angles = sorted(list({scan.angle for scan in self.scans}))
+        print(angles)
+        for angle in angles:
+            scans = [scan for scan in self.scans if scan.angle == angle]
+            points_data = {"material": [],
+                           "type_": [],
+                           "angle": [],
+                           "mse_type": [],
+                           "deviation": [],
+                           }
+            for scan in scans:
+                for point in scan:
+                    points_data["angle"].append(scan.angle)
+                    points_data["type_"].append(scan.type_)
+                    points_data["material"].append(scan.material)
+                    points_data["deviation"].append(point.v_y)
+                    points_data["mse_type"].append("mse_y")
 
-            data = pd.DataFrame(data)
-            ax = sns.displot(data=data, x="deviation", hue="type", kde=True)
-            ax.fig.suptitle(f"{self.surface_type} angle: {angle}")
-            ax.set(xlabel="point_deviation", ylabel="count")
+                    points_data["angle"].append(scan.angle)
+                    points_data["type_"].append(scan.type_)
+                    points_data["material"].append(scan.material)
+                    points_data["deviation"].append(point.v_d)
+                    points_data["mse_type"].append("mse_d")
+            df = pd.DataFrame(points_data)
+            ax = sns.displot(data=df,
+                             x="deviation",
+                             hue="mse_type",
+                             col="type_",
+                             row="angle",
+                             kde=True,
+                             )
             plt.show()
