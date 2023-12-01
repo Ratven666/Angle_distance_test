@@ -2,6 +2,7 @@ import random
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 from Plane import Plane
 from Point import Point
@@ -16,6 +17,7 @@ class Scan:
         self.min_x, self.min_y, self.min_z = None, None, None
         self.max_x, self.max_y, self.max_z = None, None, None
         self.base_plane = None
+        self.sub_plane = None
         self.mse_y = None
         self.mse_d = None
         self.type_ = None
@@ -36,11 +38,13 @@ class Scan:
 
     def get_sub_scan(self, point_count, random_seed=None):
         if point_count < 0 or point_count > len(self):
-            raise ValueError("Неправильное количество точек в субскане")
+            raise ValueError(f"Неправильное количество точек в субскане. Передано: {point_count}"
+                             f" в скане: {len(self)} точек")
         if random_seed is not None:
             random.seed(random_seed)
         sub_scan = deepcopy(self)
         sub_scan.points = random.sample(sub_scan.points, point_count)
+        sub_scan.sub_plane = Plane.calk_plane_from_scan(sub_scan)
         return sub_scan
 
     @classmethod
@@ -178,6 +182,13 @@ class ScanPlotterMPL:
             z_lst.append(point.z)
         return {"x": x_lst, "y": y_lst, "z": z_lst, "scan": scan}
 
+    def _plot_plane(self, scan: Scan, plane):
+        x = np.arange(scan.min_x, scan.max_x + 1e-6, scan.max_x - scan.min_x)
+        z = np.arange(scan.min_z, scan.max_z + 1e-6, scan.max_z - scan.min_z)
+        x, z = np.meshgrid(x, z)
+        y = (plane.a * x + plane.c * z + plane.d) / -plane.b
+        self.ax.plot_surface(x, y, z, alpha=0.5)
+
     def plot(self, scan):
         """
         Отрисовка скана в 3D
@@ -194,5 +205,8 @@ class ScanPlotterMPL:
                         marker="+",
                         s=self.point_size,
                         )
+        self._plot_plane(scan, scan.base_plane)
+        if scan.sub_plane is not None:
+            self._plot_plane(scan, scan.sub_plane)
         plt.show()
 

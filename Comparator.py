@@ -90,6 +90,7 @@ class Comparator:
                          col="type_",
                          kind="line",
                          markers=True,
+                         errorbar=("se", 3),
                          )
         plt.show()
 
