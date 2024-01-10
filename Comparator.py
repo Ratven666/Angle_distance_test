@@ -7,9 +7,9 @@ from Scan import Scan
 
 class Comparator:
 
-    def __init__(self, surface_type, data_dict):
+    def __init__(self, surface_type, *data_dicts):
         self.surface_type = surface_type
-        self.data_dict = data_dict
+        self.data_dicts = data_dicts
         self.scans = []
         self.points_df = None
         self.scans_df = None
@@ -19,20 +19,21 @@ class Comparator:
         return iter(self.scans)
 
     def _init_comparator(self):
-        for data in self.data_dict:
-            scan_name = f"{data['type_']}_{data['material']}_{data['angle']}"
-            self.scans.append(Scan.load_scan_from_file(scan_name=scan_name,
-                                                       filepath=data["filepath"],
-                                                       type_=data['type_'],
-                                                       material=data['material'],
-                                                       angle=data['angle']
-                                                       ))
-        scans_data = {"material": [],
-                       "type_": [],
-                       "angle": [],
-                       "mse": [],
-                       "mse_type": [],
-                      }
+        for data_list in self.data_dicts:
+            for data in data_list:
+                scan_name = f"{data['type_']}_{data['material']}_{data['angle']}"
+                self.scans.append(Scan.load_scan_from_file(scan_name=scan_name,
+                                                           filepath=data["filepath"],
+                                                           type_=data['type_'],
+                                                           material=data['material'],
+                                                           angle=data['angle']
+                                                           ))
+            scans_data = {"material": [],
+                           "type_": [],
+                           "angle": [],
+                           "mse": [],
+                           "mse_type": [],
+                          }
         for scan in self.scans:
             scans_data["material"].append(scan.material)
             scans_data["type_"].append(scan.type_)
@@ -88,6 +89,7 @@ class Comparator:
                          style="mse_type",
                          hue="mse_type",
                          col="type_",
+                         row="material",
                          kind="line",
                          markers=True,
                          errorbar=("se", 3),
