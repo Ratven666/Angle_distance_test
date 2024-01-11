@@ -14,9 +14,8 @@ class ScanSamplerMonteCarlo:
         self.n_iteration = n_iteration
         self.x0 = (scan.max_x - scan.min_x) / 2
         self.z0 = (scan.max_z - scan.min_z) / 2
-        self.deviation_df = None
-        self._calk_stat_data()
-        self._calk_mse()
+        self.deviation_df = self._calk_stat_data()
+        self.mse_df = self._calk_mse()
 
     def _calk_stat_data(self):
         data = {"point_count": [],
@@ -34,7 +33,8 @@ class ScanSamplerMonteCarlo:
                     continue
                 data["point_count"].append(point_count)
                 data["deviation"].append(deviation)
-        self.deviation_df = pd.DataFrame(data)
+        deviation_df = pd.DataFrame(data)
+        return deviation_df
 
     def _calk_mse(self):
         mse_data = {"mse": [],
@@ -44,7 +44,8 @@ class ScanSamplerMonteCarlo:
             mse = deviation_df["deviation"].std()
             mse_data["mse"].append(mse)
             mse_data["point_count"].append(point_count)
-        self.mse_df = pd.DataFrame(mse_data)
+        mse_df = pd.DataFrame(mse_data)
+        return mse_df
 
     def plot_distribution(self):
         ax = sns.displot(data=self.deviation_df,
